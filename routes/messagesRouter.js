@@ -1,0 +1,14 @@
+const express = require('express')
+const messagesController = require('../controllers/messagesController.js')
+
+const router = express.Router();
+
+router.get('/:key', messagesController.getMessage, (req, res) => {
+    res.status(200).json(res.locals.message)
+})
+
+router.post('/', messagesController.storeMessage, (_req, res) => {
+    res.status(200).json(res.locals.message)
+}) 
+
+module.exports = router;
