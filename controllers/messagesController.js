@@ -1,29 +1,84 @@
 const Message = require("../models/Message")
+const isExpired = require("../utils/isExpired.js")
+
+
+const markAsInvalid = async (key) => {
+    try {
+        await Message.findByIdAndUpdate(key, { valid: false})
+        return;
+    } catch(e){
+        res.locals.status(500)
+        res.locals.message = {
+            success: false,
+            error: `Error updating message: ${e.message}`,
+            token: null
+        };
+        
+        return next();
+    }
+}
+
+const checkIfInLast24Hours = (lastUpdated) => {
+    return isExpired(lastUpdated)  
+}
 
 const messagesController = {
     getMessage: async (req, res, next) => {
-        const key = req.params.key
-        res.locals.message = `RetrievedMessage for key of: ${key}`;
-        next();
+        const key = req.params.key;
+        const errorMessage = {
+            success: false,
+            name: null,
+            email: null,
+            message: null,
+            error: "Invalid or expired token"
+        };
+
+        try {
+            const data = await Message.findById(key);   
+            const { name, email, message, lastUpdated, valid } = data;
+            const inLast24Hours = checkIfInLast24Hours(lastUpdated);
+
+            if (!valid || inLast24Hours){
+                res.locals.status = 400;
+                res.locals.message = errorMessage;
+                return next();
+            }
+
+            await markAsInvalid(key);
+
+            res.locals.status = 200;
+            res.locals.message = {
+                success: true,
+                name: name,
+                email: email,
+                message: message,
+                error: null
+            }
+            
+            return next()
+        } catch(e){
+            res.locals.status = 500;
+            res.locals.message = {
+                success: false,
+                error: `Internal server error in messagesController.getMessage: ${e.message}`,
+                token: null
+            };
+            
+            return next();
+        }
     },
 
     storeMessage: async (req, res, next) => {
         const { name, email, message } = req.body;
-        const errors = [];
+        let errorMessage = '';
 
-        if (!name) errors.push("Please include a name.");
-        if (!email) errors.push("Please include a valid email.")
-        if (!message) errors.push("Please include a message.")
-        if (message && message.length > 250) errors.push("Message length must be 250 characters or less.")   
+        if (!name) errorMessage += "Please include a name. "
+        if (!email) errorMessage += "Please include a valid email. "
+        if (!message) errorMessage += "Please include a message. "
+        if (message && message.length > 250) errorMessage += "Message length must be 250 characters or less."
         
-        if (errors.length) {
-            let errorMessage = '';
-            for (const e of errors) {
-                errorMessage += `${e} `
-            }
-            
+        if (errorMessage) {
             res.locals.status = 400;
-
             res.locals.message = {
                 success: false,
                 error: errorMessage.trim(),
@@ -49,7 +104,6 @@ const messagesController = {
 
             return next()
         } catch(e){
-            console.log(`Error in messagesController.storeMessage: ${e.message}`);
             res.locals.status = 500;
             res.locals.message = {
                 success: false,
@@ -59,7 +113,7 @@ const messagesController = {
             
             return next();
         }
-    }
+    },
 
 }
 

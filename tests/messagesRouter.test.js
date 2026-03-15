@@ -2,11 +2,32 @@ const request = require('supertest')
 const app = require('../app.js')
 
 describe('GET /message', () => {
-  it('returns 200 with status ok', async () => {
-    const res = await request(app).get('/message/key');
+  it('returns 200 with stored information', async () => {
+      const body = {
+          name: "John Davis",
+          email: "jdavis@icc.com",
+          message: "Great job with the assessment Nestor!"
+      }
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toBe("RetrievedMessage for key of: key");
+      const message = await request(app)
+                        .post('/message')
+                        .send(body)
+                        .set('Accept', 'application/json')
+
+      await request(app)
+          .get(`/message/${message.body.token}`)
+          .expect(200)
+          .then(res => {
+            expect(res.body).toEqual(
+              expect.objectContaining({
+                success: true,
+                message: body.message,
+                name: body.name,
+                email: body.email,
+                error: null
+              })
+            )
+          })
   });
 });
 
