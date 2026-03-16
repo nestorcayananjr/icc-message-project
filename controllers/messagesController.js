@@ -1,26 +1,6 @@
 const Message = require("../models/Message")
-const isExpired = require("../utils/isExpired.js")
-
-
-const markAsInvalid = async (key) => {
-    try {
-        await Message.findByIdAndUpdate(key, { valid: false})
-        return;
-    } catch(e){
-        res.locals.status(500)
-        res.locals.message = {
-            success: false,
-            error: `Error updating message: ${e.message}`,
-            token: null
-        };
-        
-        return next();
-    }
-}
-
-const checkIfInLast24Hours = (lastUpdated) => {
-    return isExpired(lastUpdated)  
-}
+const checkIfInLast24Hours = require("../utils/checkIfInLast24Hours.js")
+const markAsInvalid = require("../utils/markAsInvalid.js")
 
 const messagesController = {
     getMessage: async (req, res, next) => {
@@ -35,10 +15,10 @@ const messagesController = {
 
         try {
             const data = await Message.findById(key);   
-            const { name, email, message, lastUpdated, valid } = data;
-            const inLast24Hours = checkIfInLast24Hours(lastUpdated);
+            const { name, email, message, updatedAt, valid } = data;
+            const inLast24Hours = checkIfInLast24Hours(updatedAt);
 
-            if (!valid || inLast24Hours){
+            if (!valid || !inLast24Hours){
                 res.locals.status = 400;
                 res.locals.message = errorMessage;
                 return next();

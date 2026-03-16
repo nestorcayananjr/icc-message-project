@@ -29,6 +29,54 @@ describe('GET /message', () => {
             )
           })
   });
+
+  it('returns 400 with error message for a token that has already been retrieved', async() => {
+    const body = {
+          name: "John Davis",
+          email: "jdavis@icc.com",
+          message: "Great job with the assessment Nestor!"
+    }
+
+    const message = await request(app)
+                      .post('/message')
+                      .send(body)
+                      .set('Accept', 'application/json')
+
+    await request(app)
+      .get(`/message/${message.body.token}`)
+
+    await request(app)
+      .get(`/message/${message.body.token}`)
+      .expect(400)
+      .then(res => {
+        expect(res.body).toEqual(
+          expect.objectContaining({
+          success: false,
+          message: null,
+          name: null,
+          email: null,
+          error: "Invalid or expired token"
+        }))
+      })
+  })
+
+  // it('returns 400 with error message for an expired token', async () => {
+  // jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'setTimeout', 'setInterval'] });
+  // jest.setSystemTime(new Date('2024-01-01T10:00:00Z'));
+
+  // const postRes = await request(app)
+  //   .post('/message')
+  //   .send({ name: 'Nestor', email: 'nestor@example.com', message: 'Hello!' });
+
+  // const { key } = postRes.body;
+
+  // // Advance only the system clock, not async machinery
+  // jest.setSystemTime(new Date('2024-01-02T11:00:00Z')); // 25 hours later
+
+  // const getRes = await request(app).get(`/message/${key}`);
+
+  // expect(getRes.statusCode).toBe(400);
+  // })
 });
 
 describe('POST /message', () => {
