@@ -3,7 +3,7 @@ const messagesController = require('../controllers/messagesController.js')
 
 const router = express.Router();
 
-router.get('/:key', messagesController.getMessage, (req, res) => {
+router.get('/:key', messagesController.getMessage, (_req, res) => {
     res.status(res.locals.status).json(res.locals.message)
 })
 
