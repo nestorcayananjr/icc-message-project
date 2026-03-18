@@ -1,4 +1,4 @@
-<h1 align="center">NOW-Issue-Tracker</h3>
+<h1 align="center">ICC-Message-Project</h3>
 
 <!-- GETTING STARTED -->
 
@@ -156,7 +156,7 @@ Stores a new message and returns a token that can be used to retrieve it.
 {
   "success": false,
   "token": null,
-  "error": "Please include a name. Please include a valid email."
+  "error": "Please include a valid name value. Please include a valid email value."
 }
 ```
 
