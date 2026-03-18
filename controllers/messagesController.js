@@ -1,6 +1,5 @@
 const Message = require("../models/Message")
 const checkIfInLast24Hours = require("../utils/checkIfInLast24Hours.js")
-const markAsInvalid = require("../utils/markAsInvalid.js")
 
 const messagesController = {
     getMessage: async (req, res, next) => {
@@ -14,7 +13,18 @@ const messagesController = {
         };
 
         try {
-            const data = await Message.findById(key);   
+            const data = await Message.findOneAndUpdate(
+                { _id: key, valid: true },
+                { valid: false },
+                { new: false }
+            );
+
+            if (!data){
+                res.locals.status = 400;
+                res.locals.message = errorMessage;
+                return next();
+            }
+
             const { name, email, message, updatedAt, valid } = data;
             const inLast24Hours = checkIfInLast24Hours(updatedAt);
 
@@ -24,19 +34,23 @@ const messagesController = {
                 return next();
             }
 
-            await markAsInvalid(key);
-
             res.locals.status = 200;
             res.locals.message = {
                 success: true,
-                name: name,
-                email: email,
-                message: message,
+                name,
+                email,
+                message,
                 error: null
             }
             
             return next()
         } catch(e){
+            if (e.name === 'CastError') {
+                res.locals.status = 400;
+                res.locals.message = errorMessage;
+                return next();
+            }
+
             res.locals.status = 500;
             res.locals.message = {
                 success: false,
@@ -52,9 +66,9 @@ const messagesController = {
         const { name, email, message } = req.body;
         let errorMessage = '';
 
-        if (!name) errorMessage += "Please include a name. "
-        if (!email) errorMessage += "Please include a valid email. "
-        if (!message) errorMessage += "Please include a message. "
+        if (!name || typeof name !== "string") errorMessage += "Please include a valid name value. "
+        if (!email || typeof email !== "string") errorMessage += "Please include a valid email value. "
+        if (!message|| typeof message !== "string") errorMessage += "Please include a valid message value. "
         if (message && message.length > 250) errorMessage += "Message length must be 250 characters or less."
         
         if (errorMessage) {
@@ -64,7 +78,7 @@ const messagesController = {
                 error: errorMessage.trim(),
                 token: null
             }
-            return next()
+            return next();
         }
             
         try {

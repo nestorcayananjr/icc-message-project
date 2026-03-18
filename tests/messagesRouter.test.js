@@ -30,7 +30,7 @@ describe('GET /message', () => {
           })
   });
 
-  it('returns 400 with error message for a token that has already been retrieved', async() => {
+  it('returns 400 with error message for a token that has already been retrieved', async () => {
     const body = {
           name: "John Davis",
           email: "jdavis@icc.com",
@@ -60,23 +60,22 @@ describe('GET /message', () => {
       })
   })
 
-  // it('returns 400 with error message for an expired token', async () => {
-  // jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'setTimeout', 'setInterval'] });
-  // jest.setSystemTime(new Date('2024-01-01T10:00:00Z'));
-
-  // const postRes = await request(app)
-  //   .post('/message')
-  //   .send({ name: 'Nestor', email: 'nestor@example.com', message: 'Hello!' });
-
-  // const { key } = postRes.body;
-
-  // // Advance only the system clock, not async machinery
-  // jest.setSystemTime(new Date('2024-01-02T11:00:00Z')); // 25 hours later
-
-  // const getRes = await request(app).get(`/message/${key}`);
-
-  // expect(getRes.statusCode).toBe(400);
-  // })
+  it('returns 400 with error message for a random token', async () => {
+    const message = await request(app)
+                      .get('/message/test')
+                      .expect(400)
+                      .then(res => {
+                        expect(res.body).toEqual(
+                          expect.objectContaining({
+                            success: false,
+                            message: null,
+                            name: null,
+                            email: null,
+                            error: "Invalid or expired token"
+                          })
+                        )
+                      })
+  })
 });
 
 describe('POST /message', () => {
@@ -121,7 +120,7 @@ describe('POST /message', () => {
                     expect(res.body).toEqual(
                       expect.objectContaining({
                         success: false,
-                        error: "Please include a name.",
+                        error: "Please include a valid name value.",
                         token: null
                       })
                     )
@@ -146,7 +145,7 @@ describe('POST /message', () => {
                     expect(res.body).toEqual(
                       expect.objectContaining({
                         success: false,
-                        error: "Please include a valid email.",
+                        error: "Please include a valid email value.",
                         token: null
                       })
                     )
@@ -177,7 +176,7 @@ describe('POST /message', () => {
                     expect(res.body).toEqual(
                       expect.objectContaining({
                         success: false,
-                        error: "Please include a message.",
+                        error: "Please include a valid message value.",
                         token: null
                       })
                     )
@@ -217,7 +216,7 @@ describe('POST /message', () => {
                 expect(res.body).toEqual(
                   expect.objectContaining({
                     success: false,
-                    error: "Please include a name. Please include a valid email. Please include a message.",
+                    error: "Please include a valid name value. Please include a valid email value. Please include a valid message value.",
                     token: null
                   })
                 )
