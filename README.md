@@ -120,7 +120,7 @@ Make sure you have the following installed locally. Links to each one are provid
     token: null
    ```
 
-9. Repeat step 8 with the following data, verifyign the error message after each one...
+9. Repeat step 8 with the following data, verifying the error message after each one...
 
    ```sh
     name: "John Davis",
