@@ -1,5 +1,6 @@
 const Message = require("../models/Message")
 const checkIfInLast24Hours = require("../utils/checkIfInLast24Hours.js")
+const isValidEmail = require("../utils/isValidEmail.js")
 
 const messagesController = {
     getMessage: async (req, res, next) => {
@@ -67,7 +68,7 @@ const messagesController = {
         let errorMessage = '';
 
         if (!name || typeof name !== "string") errorMessage += "Please include a valid name value. "
-        if (!email || typeof email !== "string") errorMessage += "Please include a valid email value. "
+        if (typeof email !== "string" || !isValidEmail(email)) errorMessage += "Please include a valid email value. "
         if (!message|| typeof message !== "string") errorMessage += "Please include a valid message value. "
         if (message && message.length > 250) errorMessage += "Message length must be 250 characters or less."
         
