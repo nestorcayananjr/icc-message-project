@@ -64,11 +64,13 @@ Make sure you have the following installed locally. Links to each one are provid
    npm run dev
    ```
 
-2. Open Postman and send a post request to localhost:3000/message. In the request include this in the body
+2. Open Postman and send a post request to http://localhost:3000/message. Click the body tab, choose the raw option and copy and paste the following...
    ```sh
-    name: "John Davis",
-    email: "jdavis@icc.com",
-    message: "Great job with the assessment Nestor!"
+   {
+    "name": "John Davis",
+    "email": "jdavis@icc.com",
+    "message": "Great job with the assessment Nestor!"
+   }
    ```
 
 3. Verify you receive a status 200 along with the following data...
@@ -84,13 +86,15 @@ Make sure you have the following installed locally. Links to each one are provid
 4. In a new tab in postman, send a get reqeuest to localhost:3000/message/{token}, using the token value from step 3. Verify you receive a status 200 along with the following data...
 
 ```sh
+{
     success: true,
     name: "John Davis",
     email: "jdavis@icc.com",
     message: "Great job with the assessment Nestor!",
     error: null
+}
 ```
-5. Repeat step 4 with the same token, this time you should verify you receive a status 400 along with the following data...
+5. Repeat step 4 with the same token, (i.e. click send again) this time you should verify you receive a status 400 along with the following data...
 
 ```sh
 {
@@ -104,55 +108,71 @@ Make sure you have the following installed locally. Links to each one are provid
 
 6. Navigate to the utils/checkIfInLast24Hours.js file. Change the EXPIRATION_TIME value to 1. Repeat steps 2 and 3 with different values. Use the token retrieved and repeat step 4, verify you receive a status 400 with the same data you received in step 5.
 
-7. Change EXPIRATION_TIME value back to 82400000.
+7. Change EXPIRATION_TIME value back to 86400000.
 
 8. Open Postman and send a post request to localhost:3000/message. In the request include this in the body
    ```sh
-    name: "",
-    email: "jdavis@icc.com",
-    message: "Great job with the assessment Nestor!"
+   {
+    "name": "",
+    "email": "jdavis@icc.com",
+    "message": "Great job with the assessment Nestor!"
+   }
    ```
 
    Verify you recieve a 400 status with the following response...
    ```sh
-    success: false,
+   {    
+   success: false,
     error: "Please include a valid name value.",
     token: null
+    }
    ```
 
 9. Repeat step 8 with the following data, verifying the error message after each one...
 
    ```sh
-    name: "John Davis",
-    email: "jdavisicc.com",
-    message: "Great job with the assessment Nestor!"
+   {    
+   "name": "John Davis",
+    "email": "jdavisicc.com",
+    "message": "Great job with the assessment Nestor!"
+    }
 
    Verify you recieve a 400 status with the following response...
+   {
     success: false,
     error: "Please include a valid email value.",
     token: null
+   }
    ```
 
    ```sh
-    name: "John Davis",
-    email: "jdavis@icc.com",
-    message: ""
+   {
+    "name": "John Davis",
+    "email": "jdavis@icc.com",
+    "message": ""
+   }
 
    Verify you recieve a 400 status with the following response...
+   {
     success: false,
     error: "Please include a valid message value.",
     token: null
+   }
    ```
 
     ```sh
-    name: "John Davis",
-    email: "jdavis@icc.com",
-    message: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium q"
+    {
+    "name": "John Davis",
+    "email": "jdavis@icc.com",
+    "message": "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium q"
+    }
 
    Verify you recieve a 400 status with the following response...
+   {
     success: false,
     error: "Message length must be 250 characters or less.",
     token: null
+   }
    ```
 
 10. Try passing different combinations of invalid values to the POST request (missing name or invalid type, missing email or invalid email [ex: no `@` or `.`, no characters before the `@`, etc.], missing, invalid, or too long of a message). Verify the error message reflects invalid values.
